@@ -11,6 +11,8 @@ import javafx.scene.paint.Color
 import javafx.stage.Stage
 import scala.util.Random
 import com.cowsunday.silver.ui.PriceChart
+import com.cowsunday.silver.data.HighestHigh
+import com.cowsunday.silver.data.LowestLow
 
 object Main extends App {
   Application.launch(classOf[MainApp], args: _*)
@@ -19,26 +21,20 @@ object Main extends App {
 class MainApp extends Application {
   override def start(stage: Stage): Unit = {
     val bars = getFakeData()
-    bars.foreach(println)
+    val highestHigh = HighestHigh(20).calculate(bars)
+    val lowestLow = LowestLow(20).calculate(bars)
+    val features = Seq(highestHigh, lowestLow)
+    // bars.foreach(println)
+    // highestHigh.foreach(println)
+    // bars.zip(highestHigh)
+    //   .foreach { case (bar, value) =>
+    //     println(s"high: ${bar.high}, highest(20): $value")  
+    //   }
     stage.setTitle("ScalaFX Canvas Fill Container Example")
 
-    val root = new StackPane()
-
-    val canvas = new Canvas()
-    val gc = canvas.getGraphicsContext2D
-
-    // Bind canvas width and height to the container's width and height
-    canvas.widthProperty().bind(root.widthProperty())
-    canvas.heightProperty().bind(root.heightProperty())
-
-    // Ensure the canvas is redrawn when the size changes
-    canvas.widthProperty().addListener((_, _, _) => draw(gc, bars))
-    canvas.heightProperty().addListener((_, _, _) => draw(gc, bars))
-
-    // Initial draw
-    draw(gc, bars)
-
-    root.getChildren.add(canvas)
+    val barWidth = 5
+    val barSpacing = 3
+    val root = new PriceChart(bars, features, barWidth, barSpacing)
 
     val scene = new Scene(root, 800, 600)
 
@@ -46,13 +42,9 @@ class MainApp extends Application {
     stage.show()
   }
 
-  private def draw(gc: GraphicsContext, bars: Seq[PriceBar]): Unit = {
-    PriceChart.drawBars(gc, bars, 5, 3)
-  }
-
   def getFakeData(): Seq[PriceBar] = {
     var lastOpen = 100.0
-    (1 to 80).map { i =>
+    (1 to 800).map { i =>
       val timestamp = Timestamp(2001, 1, i)
       val move = randomMove(5)
       val nextOpen = lastOpen + move
