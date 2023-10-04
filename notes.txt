@@ -1,0 +1,4 @@
++ blank section all the way right
+
++ shrinking the view hides the scrollbar.
+  
